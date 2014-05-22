@@ -17,7 +17,6 @@ function stateContext(el) {
  * @name ui.router.state.directive:ui-sref
  *
  * @requires ui.router.state.$state
- * @requires $timeout
  *
  * @restrict A
  *
@@ -74,8 +73,8 @@ function stateContext(el) {
  * @param {string} ui-sref 'stateName' can be any valid absolute or relative state
  * @param {Object} ui-sref-opts options to pass to {@link ui.router.state.$state#go $state.go()}
  */
-$StateRefDirective.$inject = ['$state', '$timeout'];
-function $StateRefDirective($state, $timeout) {
+$StateRefDirective.$inject = ['$state'];
+function $StateRefDirective($state) {
   var allowedOptions = ['location', 'inherit', 'reload'];
 
   return {
@@ -127,9 +126,10 @@ function $StateRefDirective($state, $timeout) {
         var button = e.which || e.button;
         if ( !(button > 1 || e.ctrlKey || e.metaKey || e.shiftKey || element.attr('target')) ) {
           // HACK: This is to allow ng-clicks to be processed before the transition is initiated:
-          $timeout(function() {
+          scope.$evalAsync(function() {
             $state.go(ref.state, params, options);
           });
+
           e.preventDefault();
         }
       });
