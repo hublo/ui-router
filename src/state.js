@@ -1192,10 +1192,38 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory,           $
     return $state;
   }
 
-  function shouldTriggerReload(to, from, locals, options) {
-    if ( to === from && ((locals === from.locals && !options.reload) || (to.self.reloadOnSearch === false)) ) {
+  function shouldTriggerReload(to, from, locals, options, fromParams, toParams) {
+    if ( to === from && ((locals === from.locals && !options.reload) || (to.self.reloadOnSearch === false && onlySearchParamsChanged(to, fromParams, toParams))) ) {
       return true;
     }
+  }
+
+  function onlySearchParamsChanged(to, fromParams, toParams) {
+    var searchParams = getSearchParams(to),
+        changedParams = diffParams(fromParams, toParams),
+        onlySearchParamsChanged = true;
+
+    angular.forEach(changedParams, function (param) {
+      onlySearchParamsChanged = onlySearchParamsChanged && (searchParams.indexOf(param) > -1);
+    })
+
+    return onlySearchParamsChanged;
+  }
+
+  function getSearchParams(to) {
+    return to.url.sourceSearch.substr(1).split('&');
+  }
+
+  function diffParams(fromParams, toParams) {
+    var diffedParams = [];
+
+    angular.forEach(toParams, function (v, k) {
+      if (!(k in fromParams) || fromParams[k] != v) {
+        diffedParams.push(k);
+      }
+    });
+
+    return diffedParams;
   }
 }
 
